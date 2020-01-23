@@ -18,28 +18,6 @@ class affect_labels:
         self.all_labels = []
         self.all_affect_label_dataframes = []
         self.merged_all_df = []
-        
-        for path in self.paths:
-            labels = self.set_labels(path)
-            self.all_labels.append(labels)
-        
-            #create data frame for affect label
-            affect_labels_dataframe = self.to_df(labels, path)
-            self.all_affect_label_dataframes.append(affect_labels_dataframe)
-            
-            #working code
-            merge1_and2 = self.merge(affect_labels_dataframe)
-            new_arr = [merge1_and2]+affect_labels_dataframe[2:]
-            merge_all = self.merge(new_arr)
-            self.merged_all_df.append(merge_all)
-            
-#            al_df_list = affect_labels_dataframe[:]
-#            for x in range(len(labels)-1):
-#                al_df_list = al_df_list
-#                new_df = self.merge(al_df_list)
-#                #update list so that next element gets merged onto previous
-#                al_df_list = [new_df] + affect_labels_dataframe[2:]
-#            self.merged_all_df.append(pd.DataFrame(al_df_list))  
 
     #set csv files to merged_affect_labels obj
     def set_labels(self,path, suffix = ".csv"):
@@ -48,6 +26,7 @@ class affect_labels:
         for name in filenames:
             if name.endswith(suffix):
                 csv_files.append(name)
+        self.all_labels.append(csv_files)
         return csv_files
     
     #get csv files
@@ -89,6 +68,8 @@ class affect_labels:
             #add all dataframes into an array -- each element is a dataset from a different annotator
             affect_label_data.append(dataFrame)
         
+        self.all_affect_label_dataframes.append(affect_label_data)  
+
         return affect_label_data
    
     #return dataframe of csv files of each annotator
@@ -105,23 +86,35 @@ class affect_labels:
     
     #make merged csvs for all video files
     def make_csv(self,dataframe,name):
-        return (dataframe.to_csv('./merged_affect_labels/'+name+'tester!.csv'))
+        return (dataframe.to_csv('./merged_affect_labels/'+name+'tester!!.csv'))
             
 if __name__ == '__main__':
+    
     al = affect_labels()
-    all_labels = al.get_labels()
+    
     all_names = al.get_names()
     paths = al.get_paths()
-    print(all_names)
-    #print(all_labels)
-    al_df = al.get_df()
-    #print(len(al_df))
-    merged_df = al.get_merged_df()
-    #print(merged_df[0])
-    print (len(merged_df))
+    
+    al_df = []
+    all_labels = []
+    merged_all_df = []
+    
+    for path in paths:
+        labels = al.set_labels(path)
+        all_labels.append(labels)
+    
+        #create data frame for affect label
+        affect_labels_dataframe = al.to_df(labels, path)
+        al_df.append(affect_labels_dataframe)
+        
+        #working code
+        merge1_and2 = al.merge(affect_labels_dataframe)
+        new_arr = [merge1_and2]+affect_labels_dataframe[2:]
+        merge_all = al.merge(new_arr)
+        merged_all_df.append(merge_all)
     
     for x in range(len(all_names)):
-        dataframe = merged_df[x]
+        dataframe = merged_all_df[x]
         name = all_names[x]
         to_csv = al.make_csv(dataframe,name)
         #print(to_csv)
