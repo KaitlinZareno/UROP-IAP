@@ -6,6 +6,7 @@ Created on Tue Jan 21 13:56:53 2020
 @author: kaitlinzareno
 """
 import pandas as pd
+import numpy as np
 import os 
 import re
 
@@ -84,9 +85,76 @@ class affect_labels:
     def get_merged_df(self):
         return self.merged_all_df
     
+    def child_valence(self,merged_dataframe):
+        #find every column in dataframe that has to deal with child's valence
+        cv_cols = [col for col in merged_dataframe.columns if "CHILD's valence" in col]       
+        category = "child valence average"
+        return cv_cols,category
+    
+    def child_valence(self,merged_dataframe):
+        #find every column in dataframe that has to deal with child's valence
+        cv_cols = [col for col in merged_dataframe.columns if "CHILD's valence" in col]       
+        category = "child valence average"
+        return cv_cols,category
+    
+    def child_arousal(self,merged_dataframe):
+        #find every column in dataframe that has to deal with child's valence
+        ca_cols = [col for col in merged_dataframe.columns if "CHILD's arousal" in col]       
+        category = "child arousal average"
+        return ca_cols,category
+    
+    def parent_valence(self,merged_dataframe):
+        #find every column in dataframe that has to deal with child's valence
+        pv_cols = [col for col in merged_dataframe.columns if "PARENT's valence" in col]       
+        category = "parent valence average"
+        return pv_cols,category
+    
+    def parent_arousal(self,merged_dataframe):
+        #find every column in dataframe that has to deal with child's valence
+        pa_cols = [col for col in merged_dataframe.columns if "PARENT's arousal" in col]       
+        category = "parent arousal average"
+        return pa_cols,category
+    
+#    def columns_to_find_avg(self,merged_dataframe):
+#        columns = []
+#        categories = []
+#        
+#        pv, pv_category = self.parent_valence(self,merged_dataframe)
+#        columns.append(pv), categories.append(pv_category)
+#        cv, cv_category = self.child_valence(self,merged_dataframe)
+#        columns.append(cv), categories.append(cv_category)
+#        pa, pa_category = self.parent_arousal(self,merged_dataframe)
+#        columns.append(pa),categories.append(pa_category)
+#        ca, ca_category = self.child_arousal(self,merged_dataframe)
+#        columns.append(ca), categories.append(ca_category)
+#        
+#        return columns,categories
+        
+    def get_average(self,merged_dataframe,column_names):
+        averages = [] 
+        #iterate over every row of dataframe
+        for index,row in merged_dataframe.iterrows():
+            #only get rows with the specific column names
+            sum_vals = 0
+            for column in column_names:
+                sum_vals += merged_dataframe.at[index,column]
+            avg = sum_vals/len(column_names)
+            averages.append(round(avg,3))
+            
+        #return averages for each row and specific category 
+        #make this list a new column in dataframe
+        return averages 
+    
+#    def get_all_averages(self,merged_dataframe):
+#        columns,categories = self.columns_to_find_avg(self,merged_dataframe)
+        
+    def make_new_column(self,dataframe,averages,category):
+        se = pd.Series(averages)
+        dataframe[category] = se      
+        
     #make merged csvs for all video files
     def make_csv(self,dataframe,name):
-        return (dataframe.to_csv('./merged_affect_labels/'+name+'tester!!.csv'))
+        return (dataframe.to_csv('./merged_affect_labels/'+name+'TEST.csv'))
             
 if __name__ == '__main__':
     
@@ -98,7 +166,7 @@ if __name__ == '__main__':
     al_df = []
     all_labels = []
     merged_all_df = []
-    
+        
     for path in paths:
         labels = al.set_labels(path)
         all_labels.append(labels)
@@ -116,5 +184,10 @@ if __name__ == '__main__':
     for x in range(len(all_names)):
         dataframe = merged_all_df[x]
         name = all_names[x]
+        #print(dataframe)
+        child_valence_col, cv_category = al.child_valence(dataframe)
+        cv_avg = al.get_average(dataframe, child_valence_col)
+        #print(cv_avg)
+        updated_df = al.make_new_column(dataframe,cv_avg,cv_category)
         to_csv = al.make_csv(dataframe,name)
         #print(to_csv)
